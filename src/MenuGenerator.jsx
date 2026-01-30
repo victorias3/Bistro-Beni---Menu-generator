@@ -37,12 +37,9 @@ const MenuPreview = ({ name, soups, dishes, desserts }) => (
     </div>
 
     <header className="menu-header">
-      <div className="restaurant-name">
-        <img
-          src="./logo.png"
-          style={{ width: "520px", height: "110px" }}
-        />
-      </div>
+      <h1 className="restaurant-name">
+        Бистро Бени
+      </h1>
 
       <p className="subtitle">Обедно Меню</p>
       <div className="pattern">
