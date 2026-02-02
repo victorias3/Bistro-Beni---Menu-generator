@@ -778,7 +778,7 @@ export default function MenuGenerator() {
         .menu-footer {
           text-align: center;
           padding-top: 1em;
-          border-top: 3px solid #c9a227;
+          // border-top: 3px solid #c9a227;
           font-weight: 600;
         }
         
