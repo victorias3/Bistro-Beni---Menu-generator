@@ -41,7 +41,58 @@ const DEFAULT_SPACING = {
   subtitleScale: 1.5,
   logoScale: 1,
   bgOpacity: 0.55,
+  fontFamily: "Cormorant Garamond",
+  textStyles: {
+    subtitle: { weight: 600, color: "#5c3a21" },
+    sectionTitle: { weight: 700, color: "#722f37" },
+    itemName: { weight: 600, color: "#2c1810" },
+    priceEur: { weight: 700, color: "#722f37" },
+    priceBgn: { weight: 700, color: "#8b5e3c" },
+    footer: { weight: 600, color: "#5c3a21" },
+  },
 };
+
+const FONT_OPTIONS = [
+  { name: "Cormorant Garamond", category: "serif" },
+  { name: "Playfair Display", category: "serif" },
+  { name: "Lora", category: "serif" },
+  { name: "Merriweather", category: "serif" },
+  { name: "Crimson Text", category: "serif" },
+  { name: "Libre Baskerville", category: "serif" },
+  { name: "EB Garamond", category: "serif" },
+  { name: "Spectral", category: "serif" },
+  { name: "Vollkorn", category: "serif" },
+  { name: "Alegreya", category: "serif" },
+  { name: "Roboto Slab", category: "serif" },
+  { name: "Noto Serif", category: "serif" },
+  { name: "Source Serif Pro", category: "serif" },
+  { name: "PT Serif", category: "serif" },
+  { name: "Bitter", category: "serif" },
+  { name: "Arvo", category: "serif" },
+  { name: "Josefin Slab", category: "serif" },
+  { name: "Cardo", category: "serif" },
+  { name: "Prata", category: "serif" },
+  { name: "Cinzel", category: "serif" },
+  { name: "Cormorant", category: "serif" },
+  { name: "Roboto", category: "sans-serif" },
+  { name: "Open Sans", category: "sans-serif" },
+  { name: "Lato", category: "sans-serif" },
+  { name: "Montserrat", category: "sans-serif" },
+  { name: "Poppins", category: "sans-serif" },
+  { name: "Raleway", category: "sans-serif" },
+  { name: "Nunito", category: "sans-serif" },
+  { name: "Ubuntu", category: "sans-serif" },
+  { name: "Oswald", category: "sans-serif" },
+  { name: "Quicksand", category: "sans-serif" },
+  { name: "Dancing Script", category: "cursive" },
+  { name: "Pacifico", category: "cursive" },
+  { name: "Great Vibes", category: "cursive" },
+  { name: "Sacramento", category: "cursive" },
+  { name: "Satisfy", category: "cursive" },
+  { name: "Tangerine", category: "cursive" },
+  { name: "Allura", category: "cursive" },
+  { name: "Alex Brush", category: "cursive" },
+];
 
 const DEFAULT_SECTIONS = [
   {
@@ -407,6 +458,125 @@ const SpacingControl = ({ label, value, onChange, min, max, step }) => (
   </div>
 );
 
+const FontSelector = ({ value, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [loadedFonts, setLoadedFonts] = useState(new Set([value]));
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      FONT_OPTIONS.forEach((font) => {
+        if (!loadedFonts.has(font.name)) {
+          const linkId = `google-font-preview-${font.name.replace(/\s+/g, "-")}`;
+          if (!document.getElementById(linkId)) {
+            const link = document.createElement("link");
+            link.id = linkId;
+            link.rel = "stylesheet";
+            link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font.name)}:wght@300;400;500;600;700&display=swap`;
+            document.head.appendChild(link);
+          }
+        }
+      });
+      setLoadedFonts(new Set(FONT_OPTIONS.map((f) => f.name)));
+    }
+  }, [isOpen, loadedFonts]);
+
+  const filteredFonts = FONT_OPTIONS.filter((font) =>
+    font.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const selectedFont = FONT_OPTIONS.find((f) => f.name === value);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <label className="text-xs text-slate-300 block mb-1">Шрифт</label>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded text-white text-sm text-left flex justify-between items-center hover:border-amber-500 focus:border-amber-500 focus:outline-none"
+      >
+        <span style={{ fontFamily: `'${value}', ${selectedFont?.category || "serif"}` }}>
+          {value}
+        </span>
+        <span className="text-slate-400">{isOpen ? "▲" : "▼"}</span>
+      </button>
+      {isOpen && (
+        <div className="absolute z-50 mt-1 w-full bg-slate-800 border border-slate-600 rounded shadow-lg max-h-64 overflow-hidden flex flex-col">
+          <div className="p-2 border-b border-slate-600">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Търси шрифт..."
+              className="w-full px-2 py-1 bg-slate-700 border border-slate-500 rounded text-white text-sm focus:border-amber-500 focus:outline-none"
+              autoFocus
+            />
+          </div>
+          <div className="overflow-y-auto flex-1">
+            {filteredFonts.map((font) => (
+              <button
+                key={font.name}
+                onClick={() => {
+                  onChange(font.name);
+                  setIsOpen(false);
+                  setSearch("");
+                }}
+                className={`w-full px-3 py-2 text-left text-sm hover:bg-slate-700 transition-colors ${
+                  value === font.name ? "bg-slate-700 text-amber-400" : "text-white"
+                }`}
+                style={{ fontFamily: `'${font.name}', ${font.category}` }}
+              >
+                {font.name}
+                <span className="text-xs text-slate-500 ml-2">({font.category})</span>
+              </button>
+            ))}
+            {filteredFonts.length === 0 && (
+              <div className="px-3 py-2 text-slate-400 text-sm">Няма резултати</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const TextStyleEditor = ({ label, style, onChange }) => {
+  return (
+    <div className="border-b border-slate-500 pb-2 mb-2 last:border-b-0 last:pb-0 last:mb-0">
+      <div className="text-xs text-slate-300 mb-2">{label}</div>
+      <div className="flex gap-2 items-center">
+        <select
+          value={style.weight}
+          onChange={(e) => onChange({ ...style, weight: parseInt(e.target.value) })}
+          className="flex-1 px-2 py-1 bg-slate-800 border border-slate-600 rounded text-white text-xs focus:border-amber-500 focus:outline-none"
+        >
+          <option value={300}>Light</option>
+          <option value={400}>Regular</option>
+          <option value={500}>Medium</option>
+          <option value={600}>Semi-Bold</option>
+          <option value={700}>Bold</option>
+        </select>
+        <input
+          type="color"
+          value={style.color}
+          onChange={(e) => onChange({ ...style, color: e.target.value })}
+          className="w-8 h-8 rounded border border-slate-600 cursor-pointer bg-transparent"
+        />
+      </div>
+    </div>
+  );
+};
+
 const TabButton = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
@@ -439,6 +609,7 @@ export default function MenuGenerator() {
 
   const [savedMenus, setSavedMenus] = useState([]);
   const [saveMenuName, setSaveMenuName] = useState("");
+  const [designSaved, setDesignSaved] = useState(false);
 
   const menuRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -460,20 +631,50 @@ export default function MenuGenerator() {
       const designStored = localStorage.getItem(DESIGN_STORAGE_KEY);
       if (designStored) {
         const parsed = JSON.parse(designStored);
-        setSpacing({ ...DEFAULT_SPACING, ...parsed });
+        const mergedTextStyles = {
+          ...DEFAULT_SPACING.textStyles,
+          ...parsed.textStyles,
+        };
+        Object.keys(DEFAULT_SPACING.textStyles).forEach((key) => {
+          mergedTextStyles[key] = {
+            ...DEFAULT_SPACING.textStyles[key],
+            ...(parsed.textStyles?.[key] || {}),
+          };
+        });
+        setSpacing({
+          ...DEFAULT_SPACING,
+          ...parsed,
+          textStyles: mergedTextStyles,
+        });
       }
     } catch (e) {
       console.error("Failed to parse design settings", e);
     }
   }, []);
 
-  useEffect(() => {
+  const saveDesignSettings = () => {
     try {
       localStorage.setItem(DESIGN_STORAGE_KEY, JSON.stringify(spacing));
+      setDesignSaved(true);
+      setTimeout(() => setDesignSaved(false), 2000);
     } catch (e) {
       console.error("Failed to save design settings", e);
     }
-  }, [spacing]);
+  };
+
+  useEffect(() => {
+    const fontName = spacing.fontFamily;
+    if (!fontName) return;
+    
+    const linkId = `google-font-${fontName.replace(/\s+/g, "-")}`;
+    if (document.getElementById(linkId)) return;
+    
+    const link = document.createElement("link");
+    link.id = linkId;
+    link.rel = "stylesheet";
+    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}:wght@300;400;500;600;700&display=swap`;
+    document.head.appendChild(link);
+  }, [spacing.fontFamily]);
 
   const saveMenu = () => {
     if (!saveMenuName.trim()) return;
@@ -499,7 +700,18 @@ export default function MenuGenerator() {
       setSections(JSON.parse(JSON.stringify(menu.sections)));
     }
     if (menu.spacing) {
-      setSpacing({ ...DEFAULT_SPACING, ...menu.spacing });
+      const mergedTextStyles = { ...DEFAULT_SPACING.textStyles };
+      Object.keys(DEFAULT_SPACING.textStyles).forEach((key) => {
+        mergedTextStyles[key] = {
+          ...DEFAULT_SPACING.textStyles[key],
+          ...(menu.spacing.textStyles?.[key] || {}),
+        };
+      });
+      setSpacing({
+        ...DEFAULT_SPACING,
+        ...menu.spacing,
+        textStyles: mergedTextStyles,
+      });
     }
     if (typeof menu.showDate === "boolean") {
       setShowDate(menu.showDate);
@@ -606,6 +818,16 @@ export default function MenuGenerator() {
     setSpacing((prev) => ({ ...prev, [key]: value }));
   };
 
+  const updateTextStyle = (textType, newStyle) => {
+    setSpacing((prev) => ({
+      ...prev,
+      textStyles: {
+        ...prev.textStyles,
+        [textType]: newStyle,
+      },
+    }));
+  };
+
   const resetSpacing = () => {
     setSpacing(DEFAULT_SPACING);
   };
@@ -650,11 +872,26 @@ export default function MenuGenerator() {
 
   const preset = EXPORT_PRESETS[exportPreset];
   const hasFixedHeight = preset.height !== null;
+  
+  const selectedFontCategory = FONT_OPTIONS.find((f) => f.name === spacing.fontFamily)?.category || "serif";
 
   return (
     <div className="min-h-screen bg-slate-900 text-white">
       <style>{`
         .menu-export-wrapper {
+          --menu-font-family: '${spacing.fontFamily}', ${selectedFontCategory};
+          --subtitle-weight: ${spacing.textStyles.subtitle.weight};
+          --subtitle-color: ${spacing.textStyles.subtitle.color};
+          --section-title-weight: ${spacing.textStyles.sectionTitle.weight};
+          --section-title-color: ${spacing.textStyles.sectionTitle.color};
+          --item-name-weight: ${spacing.textStyles.itemName.weight};
+          --item-name-color: ${spacing.textStyles.itemName.color};
+          --price-eur-weight: ${spacing.textStyles.priceEur.weight};
+          --price-eur-color: ${spacing.textStyles.priceEur.color};
+          --price-bgn-weight: ${spacing.textStyles.priceBgn.weight};
+          --price-bgn-color: ${spacing.textStyles.priceBgn.color};
+          --footer-weight: ${spacing.textStyles.footer.weight};
+          --footer-color: ${spacing.textStyles.footer.color};
           padding: 24px;
           background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
           border-radius: 8px;
@@ -713,11 +950,11 @@ export default function MenuGenerator() {
         }
         
         .subtitle {
-          font-family: 'Cormorant Garamond', serif;
-          color: #5c3a21;
+          font-family: var(--menu-font-family);
+          color: var(--subtitle-color);
           letter-spacing: 0.4em;
           text-transform: uppercase;
-          font-weight: 600;
+          font-weight: var(--subtitle-weight);
         }
         
         .menu-date {
@@ -731,16 +968,16 @@ export default function MenuGenerator() {
         }
         
         .section-title {
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--menu-font-family);
           font-size: 2.5em;
-          color: #722f37;
+          color: var(--section-title-color);
           text-align: center;
           margin-bottom: 0.5em;
-          font-weight: 700;
+          font-weight: var(--section-title-weight);
         }
         
         .menu-item {
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--menu-font-family);
           display: flex;
           justify-content: space-between;
           align-items: baseline;
@@ -755,38 +992,38 @@ export default function MenuGenerator() {
         
         .item-name {
           font-size: 2em;
-          color: #2c1810;
-          font-weight: 600;
+          color: var(--item-name-color);
+          font-weight: var(--item-name-weight);
         }
         
         .item-price {
           font-size: 2em;
-          font-weight: 700;
           white-space: nowrap;
           margin-left: 1em;
-          color: #722f37;
+          color: var(--price-eur-color);
         }
         
         .price-euro {
-          color: #722f37;
+          color: var(--price-eur-color);
+          font-weight: var(--price-eur-weight);
         }
         
         .price-bgn {
-          color: #8b5e3c;
+          color: var(--price-bgn-color);
+          font-weight: var(--price-bgn-weight);
         }
         
         .menu-footer {
           text-align: center;
           padding-top: 1em;
-          // border-top: 3px solid #c9a227;
-          font-weight: 600;
         }
         
         .footer-text {
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--menu-font-family);
           font-size: 1.75em;
-          color: #5c3a21;
+          color: var(--footer-color);
           font-style: italic;
+          font-weight: var(--footer-weight);
         }
         
         .pattern {
@@ -1018,6 +1255,49 @@ export default function MenuGenerator() {
                 </div>
 
                 <div className="bg-slate-600 rounded-lg p-3">
+                  <FontSelector
+                    value={spacing.fontFamily}
+                    onChange={(v) => updateSpacing("fontFamily", v)}
+                  />
+                </div>
+
+                <div className="bg-slate-600 rounded-lg p-3">
+                  <h3 className="text-sm font-semibold mb-3 text-amber-400">
+                    Стилове на текст
+                  </h3>
+                  <TextStyleEditor
+                    label="Подзаглавие"
+                    style={spacing.textStyles.subtitle}
+                    onChange={(s) => updateTextStyle("subtitle", s)}
+                  />
+                  <TextStyleEditor
+                    label="Заглавия на секции"
+                    style={spacing.textStyles.sectionTitle}
+                    onChange={(s) => updateTextStyle("sectionTitle", s)}
+                  />
+                  <TextStyleEditor
+                    label="Имена на артикули"
+                    style={spacing.textStyles.itemName}
+                    onChange={(s) => updateTextStyle("itemName", s)}
+                  />
+                  <TextStyleEditor
+                    label="Цена (EUR)"
+                    style={spacing.textStyles.priceEur}
+                    onChange={(s) => updateTextStyle("priceEur", s)}
+                  />
+                  <TextStyleEditor
+                    label="Цена (лв)"
+                    style={spacing.textStyles.priceBgn}
+                    onChange={(s) => updateTextStyle("priceBgn", s)}
+                  />
+                  <TextStyleEditor
+                    label="Футър"
+                    style={spacing.textStyles.footer}
+                    onChange={(s) => updateTextStyle("footer", s)}
+                  />
+                </div>
+
+                <div className="bg-slate-600 rounded-lg p-3">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-semibold text-amber-400">
                       Размери и разстояния
@@ -1080,6 +1360,17 @@ export default function MenuGenerator() {
                     />
                   </div>
                 </div>
+
+                <button
+                  onClick={saveDesignSettings}
+                  className={`w-full py-3 font-semibold rounded transition-colors ${
+                    designSaved
+                      ? "bg-green-600 text-white"
+                      : "bg-amber-600 hover:bg-amber-500 text-slate-900"
+                  }`}
+                >
+                  {designSaved ? "✓ Запазено!" : "Запази настройките"}
+                </button>
               </div>
             )}
 
