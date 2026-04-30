@@ -119,6 +119,7 @@ const DEFAULT_SECTIONS = [
 ];
 
 const FOOTER_TEXT = 'Адрес: гр. Бяла, 7100 ул. "Минчо Папасчиков" Nº38';
+const FOOTER_PHONE_TEXT = "Телефон за поръчки: 0887 839 008";
 
 const CornerOrnament = () => (
   <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -297,9 +298,8 @@ const MenuPreview = ({
           style={{ marginTop: `${spacing.sectionGap}rem` }}
         >
           <p className="footer-text">{FOOTER_TEXT}</p>
-          <p className="footer-text" style={{ marginTop: "0.75em" }}>
-            Заповядайте!
-          </p>
+          <p className="footer-text">{FOOTER_PHONE_TEXT}</p>
+          <p className="footer-text">Заповядайте!</p>
         </footer>
       </div>
     </div>
@@ -1014,6 +1014,9 @@ export default function MenuGenerator() {
         }
         
         .menu-footer {
+          display: flex;
+          flex-direction: column;
+          gap: 0.45em;
           text-align: center;
           padding-top: 1em;
         }
