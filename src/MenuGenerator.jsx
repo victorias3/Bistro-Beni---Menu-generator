@@ -48,7 +48,7 @@ const DEFAULT_SPACING = {
     itemName: { weight: 600, color: "#2c1810" },
     priceEur: { weight: 700, color: "#722f37" },
     priceBgn: { weight: 700, color: "#8b5e3c" },
-    footer: { weight: 600, color: "#5c3a21" },
+    footer: { weight: 600, color: "#000000" },
   },
 };
 
